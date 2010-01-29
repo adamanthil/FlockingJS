@@ -6,9 +6,9 @@ void setup() {
   size(600,500);
   colorMode(RGB,255,255,255,100);
   flock = new Flock();
-  // Add an initial set of boids into the system
+  // Add an initial set of preys into the system
   for (int i = 0; i < 20; i++) {
-    flock.addBoid(new Boid(new Vector3D(width/2,height/2),2.0f,0.05f));
+    flock.addPrey(new Prey(new Vector3D(width/2,height/2),2.0f,0.05f));
   }
   smooth();
 }
@@ -19,40 +19,56 @@ void draw() {
   flock.run();
 }
 
-// Add a new boid into the System
+// Add a new prey into the System
 void mousePressed() {
-  flock.addBoid(new Boid(new Vector3D(mouseX,mouseY),2.0f,0.05f));
-  //flock.removeBoid((Boid)flock.boids.get(0));
+  flock.addPredator(new Predator(new Vector3D(mouseX,mouseY),3.0f,0.06f));
+  //flock.removePrey((Prey)flock.preys.get(0));
 }
 
 class Flock {
-  ArrayList boids; // An arraylist for all the boids
+  ArrayList preys; // An arraylist for all the preys
+  ArrayList preds; // An arraylist for all the preds
 
   Flock() {
-    boids = new ArrayList(); // Initialize the arraylist
+    preys = new ArrayList(); // Initialize the arraylist
+    preds = new ArrayList();
   }
 
   void run() {
-    for (int i = 0; i < boids.size(); i++) {
-      Boid b = (Boid) boids.get(i);  
-      b.run(boids);  // Passing the entire list of boids to each boid individually
+    for (int i = 0; i < preys.size(); i++) {
+      Prey b = (Prey) preys.get(i);  
+      b.run(preys,preds);  // Passing the entire list of preys to each prey individually
+    }
+    for (int i = 0; i < preds.size(); i++) {
+      Predator b = (Predator) preds.get(i);  
+      b.run(preys,preds);  // Passing the entire list of preys to each prey individually
     }
   }
 
-	void addBoid(Boid b) {
-		boids.add(b);
+	void addPrey(Prey b) {
+		preys.add(b);
 	}
 
-	void removeBoid(Boid b) {
-		int index = boids.indexOf(b);
+	void addPredator(Predator p) {
+		preds.add(p);
+	}
+
+	void removePrey(Prey b) {
+		int index = preys.indexOf(b);
 		if(index > -1) {
-			boids.remove(index);	
+			preys.remove(index);	
 		}
 	 }
+	void removePredator(Predator p) {
+		int index = preds.indexOf(p);
+		if(index > -1) {
+			preds.remove(index);	
+		}
+	}
 }
 
 
-class Boid {
+class Prey {
 
   Vector3D loc;
   Vector3D vel;
@@ -61,35 +77,40 @@ class Boid {
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
 
-  Boid(Vector3D l, float ms, float mf) {
+  Prey(Vector3D l, float ms, float mf) {
     acc = new Vector3D(0,0);
     vel = new Vector3D(random(-1,1),random(-1,1));
     loc = l.copy();
-    r = 5.0f;
+    r = 4.0f;
     maxspeed = ms;
     maxforce = mf;
   }
   
-  void run(ArrayList boids) {
-    flock(boids);
+  void run(ArrayList preys, ArrayList preds) {
+    flock(preys, preds);
     update();
     borders();
     render();
   }
 
   // We accumulate a new acceleration each time based on three rules
-  void flock(ArrayList boids) {
-    Vector3D sep = separate(boids);   // Separation
-    Vector3D ali = align(boids);      // Alignment
-    Vector3D coh = cohesion(boids);   // Cohesion
+  void flock(ArrayList preys, ArrayList preds) {
+    Vector3D sep = separate(preys);   // Separation
+    Vector3D ali = align(preys);      // Alignment
+    Vector3D coh = cohesion(preys);   // Cohesion
+	Vector3D fle = flee(preds);			// Flee
+	
     // Arbitrarily weight these forces
     sep.mult(3.0f);
     ali.mult(1.0f);
     coh.mult(1.0f);
+	fle.mult(4.0f);
+	
     // Add the force vectors to acceleration
     acc.add(sep);
     acc.add(ali);
     acc.add(coh);
+	acc.add(fle);
   }
   
   // Method to update location
@@ -158,14 +179,14 @@ class Boid {
   }
 
   // Separation
-  // Method checks for nearby boids and steers away
-  Vector3D separate (ArrayList boids) {
+  // Method checks for nearby preys and steers away
+  Vector3D separate (ArrayList preys) {
     float desiredseparation = 30.0f;
     Vector3D sum = new Vector3D(0,0,0);
     int count = 0;
-    // For every boid in the system, check if it's too close
-    for (int i = 0 ; i < boids.size(); i++) {
-      Boid other = (Boid) boids.get(i);
+    // For every prey in the system, check if it's too close
+    for (int i = 0 ; i < preys.size(); i++) {
+      Prey other = (Prey) preys.get(i);
       float d = loc.distance(loc,other.loc);
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {
@@ -185,13 +206,13 @@ class Boid {
   }
   
   // Alignment
-  // For every nearby boid in the system, calculate the average velocity
-  Vector3D align (ArrayList boids) {
+  // For every nearby prey in the system, calculate the average velocity
+  Vector3D align (ArrayList preys) {
     float neighbordist = 50.0f;
     Vector3D sum = new Vector3D(0,0,0);
     int count = 0;
-    for (int i = 0 ; i < boids.size(); i++) {
-      Boid other = (Boid) boids.get(i);
+    for (int i = 0 ; i < preys.size(); i++) {
+      Prey other = (Prey) preys.get(i);
       float d = loc.distance(loc,other.loc);
       if ((d > 0) && (d < neighbordist)) {
         sum.add(other.vel);
@@ -206,13 +227,13 @@ class Boid {
   }
 
   // Cohesion
-  // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
-  Vector3D cohesion (ArrayList boids) {
+  // For the average location (i.e. center) of all nearby preys, calculate steering vector towards that location
+  Vector3D cohesion (ArrayList preys) {
     float neighbordist = 50.0f;
     Vector3D sum = new Vector3D(0,0,0);   // Start with empty vector to accumulate all locations
     int count = 0;
-    for (int i = 0 ; i < boids.size(); i++) {
-      Boid other = (Boid) boids.get(i);
+    for (int i = 0 ; i < preys.size(); i++) {
+      Prey other = (Prey) preys.get(i);
       float d = loc.distance(loc,other.loc);
       if ((d > 0) && (d < neighbordist)) {
         sum.add(other.loc); // Add location
@@ -225,10 +246,232 @@ class Boid {
     }
     return sum;
   }
-}
+
+  Vector3D flee (ArrayList preds) {
+    float neighbordist = 80.0f;
+    Vector3D sum = new Vector3D(0,0,0);   // Start with empty vector to accumulate all locations
+    int count = 0;
+    for (int i = 0 ; i < preds.size(); i++) {
+      Predator other = (Predator) preds.get(i);
+      float d = loc.distance(loc,other.loc);
+      if ((d > 0) && (d < neighbordist)) {
+        sum.add(other.loc); // Add location
+        count++;
+      }
+    }
+    if (count > 0) {
+      sum.div((float)count);
+      sum = steer(sum,false);  // Steer towards the location
+		sum.mult(-1.0f);
+		return sum;
+    }
+    return sum;
+  }
+
+} // End class Prey
+
+class Predator {
+
+  Vector3D loc;
+  Vector3D vel;
+  Vector3D acc;
+  float r;
+  float maxforce;    // Maximum steering force
+  float maxspeed;    // Maximum speed
+
+  Predator(Vector3D l, float ms, float mf) {
+    acc = new Vector3D(0,0);
+    vel = new Vector3D(random(-1,1),random(-1,1));
+    loc = l.copy();
+    r = 6.0f;
+    maxspeed = ms;
+    maxforce = mf;
+  }
+  
+  void run(ArrayList preys, ArrayList preds) {
+    flock(preys, preds);
+    update();
+    borders();
+    render();
+  }
+
+  // We accumulate a new acceleration each time based on three rules
+  void flock(ArrayList preys, ArrayList preds) {
+    Vector3D sep = separate(preds);   // Separation
+    Vector3D ali = align(preds);      // Alignment
+    Vector3D coh = cohesion(preds);   // Cohesion
+	Vector3D chs = chase(preys);	  // Chase
+	
+    // Arbitrarily weight these forces
+    sep.mult(3.0f);
+    ali.mult(1.0f);
+    coh.mult(0.5f);
+    chs.mult(5.0f);
+	
+    // Add the force vectors to acceleration
+    acc.add(sep);
+    acc.add(ali);
+    acc.add(coh);
+	acc.add(chs);
+  }
+  
+  // Method to update location
+  void update() {
+    // Update velocity
+    vel.add(acc);
+    // Limit speed
+    vel.limit(maxspeed);
+    loc.add(vel);
+    // Reset accelertion to 0 each cycle
+    acc.setXYZ(0,0,0);
+  }
+
+  void seek(Vector3D target) {
+    acc.add(steer(target,false));
+  }
+ 
+  void arrive(Vector3D target) {
+    acc.add(steer(target,true));
+  }
+
+  // A method that calculates a steering vector towards a target
+  // Takes a second argument, if true, it slows down as it approaches the target
+  Vector3D steer(Vector3D target, boolean slowdown) {
+    Vector3D steer;  // The steering vector
+    Vector3D desired = target.sub(target,loc);  // A vector pointing from the location to the target
+    float d = desired.magnitude(); // Distance from the target is the magnitude of the vector
+    // If the distance is greater than 0, calc steering (otherwise return zero vector)
+    if (d > 0) {
+      // Normalize desired
+      desired.normalize();
+      // Two options for desired vector magnitude (1 -- based on distance, 2 -- maxspeed)
+      if ((slowdown) && (d < 100.0f)) desired.mult(maxspeed*(d/100.0f)); // This damping is somewhat arbitrary
+      else desired.mult(maxspeed);
+      // Steering = Desired minus Velocity
+      steer = target.sub(desired,vel);
+      steer.limit(maxforce);  // Limit to maximum steering force
+    } else {
+      steer = new Vector3D(0,0);
+    }
+    return steer;
+  }
+  
+  void render() {
+    // Draw a triangle rotated in the direction of velocity
+    float theta = vel.heading2D() + radians(90);
+    fill(200,0,0);
+    stroke(200,0,0);
+    pushMatrix();
+    translate(loc.x,loc.y);
+    rotate(theta);
+    beginShape(TRIANGLES);
+    vertex(0, -r*2);
+    vertex(-r, r*2);
+    vertex(r, r*2);
+    endShape();
+    popMatrix();
+  }
+  
+  // Wraparound
+  void borders() {
+    if (loc.x < -r) loc.x = width+r;
+    if (loc.y < -r) loc.y = height+r;
+    if (loc.x > width+r) loc.x = -r;
+    if (loc.y > height+r) loc.y = -r;
+  }
+
+  // Separation
+  // Method checks for nearby preys and steers away
+  Vector3D separate (ArrayList preds) {
+    float desiredseparation = 30.0f;
+    Vector3D sum = new Vector3D(0,0,0);
+    int count = 0;
+    // For every prey in the system, check if it's too close
+    for (int i = 0 ; i < preds.size(); i++) {
+      Predator other = (Predator) preds.get(i);
+      float d = loc.distance(loc,other.loc);
+      // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+      if ((d > 0) && (d < desiredseparation)) {
+        // Calculate vector pointing away from neighbor
+        Vector3D diff = loc.sub(loc,other.loc);
+        diff.normalize();
+        diff.div(d);        // Weight by distance
+        sum.add(diff);
+        count++;            // Keep track of how many
+      }
+    }
+    // Average -- divide by how many
+    if (count > 0) {
+      sum.div((float)count);
+    }
+    return sum;
+  }
+  
+  // Alignment
+  // For every nearby prey in the system, calculate the average velocity
+  Vector3D align (ArrayList preds) {
+    float neighbordist = 50.0f;
+    Vector3D sum = new Vector3D(0,0,0);
+    int count = 0;
+    for (int i = 0 ; i < preds.size(); i++) {
+      Predator other = (Predator) preds.get(i);
+      float d = loc.distance(loc,other.loc);
+      if ((d > 0) && (d < neighbordist)) {
+        sum.add(other.vel);
+        count++;
+      }
+    }
+    if (count > 0) {
+      sum.div((float)count);
+      sum.limit(maxforce);
+    }
+    return sum;
+  }
+
+  // Cohesion
+  // For the average location (i.e. center) of all nearby preds, calculate steering vector towards that location
+  Vector3D cohesion (ArrayList preds) {
+    float neighbordist = 50.0f;
+    Vector3D sum = new Vector3D(0,0,0);   // Start with empty vector to accumulate all locations
+    int count = 0;
+    for (int i = 0 ; i < preds.size(); i++) {
+      Predator other = (Predator) preds.get(i);
+      float d = loc.distance(loc,other.loc);
+      if ((d > 0) && (d < neighbordist)) {
+        sum.add(other.loc); // Add location
+        count++;
+      }
+    }
+    if (count > 0) {
+      sum.div((float)count);
+      return steer(sum,false);  // Steer towards the location
+    }
+    return sum;
+  }
+
+	// Chase
+	Vector3D chase (ArrayList preys) {
+	    float neighbordist = 100.0f;
+	    Vector3D sum = new Vector3D(0,0,0);   // Start with empty vector to accumulate all locations
+	    int count = 0;
+	    for (int i = 0 ; i < preys.size(); i++) {
+	      Prey other = (Prey) preys.get(i);
+	      float d = loc.distance(loc,other.loc);
+	      if ((d > 0) && (d < neighbordist)) {
+	        sum.add(other.loc); // Add location
+	        count++;
+	      }
+	    }
+	    if (count > 0) {
+	      sum.div((float)count);
+	      return steer(sum,false);  // Steer towards the location
+	    }
+	    return sum;
+	}
+
+} // End class Predator
 
 // Simple Vector3D Class 
-
 static class Vector3D {
   float x;
   float y;
