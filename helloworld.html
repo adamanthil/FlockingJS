@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- A template for learning Proce55ing, cobbled together by Puneet Kishor -->
+<!-- Released under a Creative Commons 3.0 BY license -->
+<!-- Jan 2010 -->
+<!-- Contact punkish@eidesis.org with quesitons -->
+
+<!-- Note the html5 DOCTYPE declaration above. It is as simple as !DOCTYPE html -->
+
+<html>
+<head>
+    <title>Processing.js</title> 
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="http://www.processingjs.org/favicon.ico">
+    
+    <!-- Put all the stylesheets first -->
+    <link rel="stylesheet" media="screen" type ="text/css" href="css/SyntaxHighlighter.css">
+    
+    <!-- Bring in the JS libraries -->
+    <script type="text/javascript" src="lib/jquery-1.4.min.js"></script>
+    <script type="text/javascript" src="lib/shCore.js"></script>
+    <script type="text/javascript" src="lib/shBrushProcessing.js"></script>
+    <script type="text/javascript" src="lib/processing.min.js"></script>
+</head>
+<body>
+
+<div id="page">  
+    <div id="content">
+        <p id="desc"></p>
+<!-- CHANGE WIDTH AND HEIGHT -->
+        <canvas id="myCanvas" width="200" height="200"></canvas>
+        <p id="instructions"></p>
+    </div><!-- #content -->
+    
+    <div class="code"><pre name="code" class="processing"></pre></div>
+</div><!-- #page -->
+
+<script language="JavaScript" type="text/javascript">
+var PJS = {
+    "name" : "helloworld",
+    
+    "desc" : "<b>Hello World</b> by STUDENT: States that this student is greeting the world",
+        
+    "instructions": "<!-- Instructions -->Click to make a green circle."
+};
+
+$(document).ready(function() {
+
+    // Fill in the blanks
+    $("#desc").html(PJS.desc);
+    $("#instructions").html(PJS.instructions);
+    
+    // Pass the script to a var using jQuery.ajax();
+    var script = $.ajax({url: "processing/" + PJS.name + ".pjs", async: false}).responseText;
+    
+    // Store the Canvas element in an object alias
+    var canvas = $('canvas#myCanvas').get(0);
+    
+    // Initialize Processing
+    Processing(canvas, script);
+    
+    // Put the script into the < pre > tag
+    $('pre.processing').html(script);
+    
+    // Highlight the code inside the < pre > tag
+    dp.SyntaxHighlighter.HighlightAll('code');  
+});
+</script>
+
+</body>  
+</html>

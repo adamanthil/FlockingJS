@@ -1,0 +1,16 @@
+void setup(){
+size(200,200);
+fill(0,255,0);
+stroke(255);
+smooth();
+background(255,0,0);
+}
+
+void draw(){ 
+text("Hello World!",50,50);
+}
+
+void mousePressed(){
+fill(0,255,0);
+ellipse(mouseX,mouseY,10,10);
+}

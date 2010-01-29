@@ -1,0 +1,59 @@
+.dp-highlighter{font-size: 12px;width:inherit;overflow:auto;margin:0px 25px 0px 0 !important;padding-top: 1px;display:block /* adds a little border on top when controls are hidden */;}
+div.dp-highlighter{font-family:"Consolas","Courier New",Courier,mono,serif;overflow:auto!important;background:#ccc;}
+div.code{border:1px solid #ccc!important;}
+
+/* clear styles */
+.dp-highlighter ol,
+.dp-highlighter ol li,
+.dp-highlighter ol li span {margin: 0;padding: 0;border: none;}
+.dp-highlighter a,
+.dp-highlighter a:hover{background: none;border: none;padding: 0;margin: 0;}
+.dp-highlighter .bar{padding-left: 45px;}
+.dp-highlighter.collapsed .bar,
+.dp-highlighter.nogutter .bar{padding-left: 0px;}
+.dp-highlighter ol{list-style: decimal; /* for ie */background-color: #fff;margin: 0px 0px 0px 45px !important; /* 1px bottom margin seems to fix occasional Firefox scrolling */padding: 0px;color: #5C5C5C;}
+.dp-highlighter.nogutter ol,
+.dp-highlighter.nogutter ol li{list-style: none !important;margin-left: 0px !important;}
+.dp-highlighter ol li,
+.dp-highlighter .columns div{list-style: decimal-leading-zero; /* better look for others, override cascade from OL */list-style-position: outside !important;border-left: 4px solid #48a;background-color: #F8F8F8;	color: #5C5C5C;padding: 0 3px 0 10px !important;margin: 0 !important;line-height: 14px;}
+.dp-highlighter.nogutter ol li,
+.dp-highlighter.nogutter .columns div{border: 0;}
+.dp-highlighter .columns{background-color: #F8F8F8;color: gray;overflow: hidden;width: 100%;}
+.dp-highlighter .columns div{padding-bottom: 5px;}
+.dp-highlighter ol li.alt{background-color: #FFF;color: inherit;}
+.dp-highlighter ol li span{color: black;background-color: inherit;}
+
+/* Adjust some properties when collapsed */
+.dp-highlighter.collapsed ol{margin: 0px;}
+.dp-highlighter.collapsed ol li{display: none;}
+
+/* Additional modifications when in print-view */
+.dp-highlighter.printing{border: none;}
+.dp-highlighter.printing .tools{display: none !important;}
+.dp-highlighter.printing li{display: list-item !important;}
+
+/* Styles for the tools */
+.dp-highlighter .tools{padding: 5px 8px 5px 10px;font: 9px Verdana, Geneva, Arial, Helvetica, sans-serif;color: silver;background-color: #e8e8e8;border-left: 4px solid #48a;}
+.dp-highlighter.nogutter .tools{border-left: 0;}
+.dp-highlighter.collapsed .tools{border-bottom: 0;}
+.dp-highlighter .tools a{font-size: 9px;color: #777;background-color: inherit;text-decoration: none;margin-right: 10px!important;}
+.dp-highlighter .tools a:hover{color:#0af;background-color: inherit;text-decoration: underline;}
+
+/* About dialog styles */
+.dp-about { background-color: #fff; color: #333; margin: 0px; padding: 0px; }
+.dp-about table { width: 100%; height: 100%; font-size: 11px; font-family: Tahoma, Verdana, Arial, sans-serif !important; }
+.dp-about td { padding: 10px; vertical-align: top; }
+.dp-about .copy { border-bottom: 1px solid #ACA899; height: 95%; }
+.dp-about .title { color: red; background-color: inherit; font-weight: bold; }
+.dp-about .para { margin: 0 0 4px 0; }
+.dp-about .footer { background-color: #ECEADB; color: #333; border-top: 1px solid #fff; text-align: right; }
+.dp-about .close { font-size: 11px; font-family: Tahoma, Verdana, Arial, sans-serif !important; background-color: #ECEADB; color: #333; width: 60px; height: 22px; }
+
+/* Language specific styles */
+.dp-highlighter .comment, .dp-highlighter .comments { color: #7e7e7e; background-color: inherit; }
+.dp-highlighter .string { color:#006699; background-color: inherit; }
+.dp-highlighter .keyword { color: #cc6600; background-color: inherit; }
+.dp-highlighter .function { color: #cc6600; background-color: inherit; }
+.dp-highlighter .functionBold { color: #cc6600; background-color: inherit; font-weight:bold;}
+.dp-highlighter .reservedword { color:#006699; background-color: inherit; }
+.dp-highlighter .preprocessor { color: gray; background-color: inherit; }
