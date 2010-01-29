@@ -8,7 +8,7 @@ void setup() {
   flock = new Flock();
   // Add an initial set of preys into the system
   for (int i = 0; i < 20; i++) {
-    flock.addPrey(new Prey(new Vector3D(width/2,height/2),2.0f,0.05f));
+    flock.addPrey(new Prey(new Vector3D(width/2,height/2),2.5f,0.08f));
   }
   smooth();
 }
@@ -104,7 +104,7 @@ class Prey {
     sep.mult(3.0f);
     ali.mult(1.0f);
     coh.mult(1.0f);
-	fle.mult(4.0f);
+	fle.mult(8.0f);
 	
     // Add the force vectors to acceleration
     acc.add(sep);
