@@ -43,6 +43,15 @@ class Flock {
       Predator b = (Predator) preds.get(i);  
       b.run(preys,preds);  // Passing the entire list of preys to each prey individually
     }
+    for (int i = 0; i < preys.size(); i++) {
+      Prey b = (Prey) preys.get(i);  
+      	for (int j = 0; j < preds.size(); j++) {
+      		Predator p = (Predator) preds.get(j);  
+      		if(p.loc.distance(p.loc,b.loc) < 10) {
+				removePrey(b);
+			}
+    	}
+    }
   }
 
 	void addPrey(Prey b) {
@@ -182,7 +191,7 @@ class Prey {
   // Method checks for nearby preys and steers away
   Vector2D separate (ArrayList preys) {
     float desiredseparation = 30.0f;
-    Vector2D sum = new Vector2D(0,0,0);
+    Vector2D sum = new Vector2D(0,0);
     int count = 0;
     // For every prey in the system, check if it's too close
     for (int i = 0 ; i < preys.size(); i++) {
@@ -209,7 +218,7 @@ class Prey {
   // For every nearby prey in the system, calculate the average velocity
   Vector2D align (ArrayList preys) {
     float neighbordist = 50.0f;
-    Vector2D sum = new Vector2D(0,0,0);
+    Vector2D sum = new Vector2D(0,0);
     int count = 0;
     for (int i = 0 ; i < preys.size(); i++) {
       Prey other = (Prey) preys.get(i);
@@ -230,7 +239,7 @@ class Prey {
   // For the average location (i.e. center) of all nearby preys, calculate steering vector towards that location
   Vector2D cohesion (ArrayList preys) {
     float neighbordist = 50.0f;
-    Vector2D sum = new Vector2D(0,0,0);   // Start with empty vector to accumulate all locations
+    Vector2D sum = new Vector2D(0,0);   // Start with empty vector to accumulate all locations
     int count = 0;
     for (int i = 0 ; i < preys.size(); i++) {
       Prey other = (Prey) preys.get(i);
@@ -249,7 +258,7 @@ class Prey {
 
   Vector2D flee (ArrayList preds) {
     float neighbordist = 80.0f;
-    Vector2D sum = new Vector2D(0,0,0);   // Start with empty vector to accumulate all locations
+    Vector2D sum = new Vector2D(0,0);   // Start with empty vector to accumulate all locations
     int count = 0;
     for (int i = 0 ; i < preds.size(); i++) {
       Predator other = (Predator) preds.get(i);
@@ -384,7 +393,7 @@ class Predator {
   // Method checks for nearby preys and steers away
   Vector2D separate (ArrayList preds) {
     float desiredseparation = 30.0f;
-    Vector2D sum = new Vector2D(0,0,0);
+    Vector2D sum = new Vector2D(0,0);
     int count = 0;
     // For every prey in the system, check if it's too close
     for (int i = 0 ; i < preds.size(); i++) {
@@ -411,7 +420,7 @@ class Predator {
   // For every nearby prey in the system, calculate the average velocity
   Vector2D align (ArrayList preds) {
     float neighbordist = 50.0f;
-    Vector2D sum = new Vector2D(0,0,0);
+    Vector2D sum = new Vector2D(0,0);
     int count = 0;
     for (int i = 0 ; i < preds.size(); i++) {
       Predator other = (Predator) preds.get(i);
@@ -432,7 +441,7 @@ class Predator {
   // For the average location (i.e. center) of all nearby preds, calculate steering vector towards that location
   Vector2D cohesion (ArrayList preds) {
     float neighbordist = 50.0f;
-    Vector2D sum = new Vector2D(0,0,0);   // Start with empty vector to accumulate all locations
+    Vector2D sum = new Vector2D(0,0);   // Start with empty vector to accumulate all locations
     int count = 0;
     for (int i = 0 ; i < preds.size(); i++) {
       Predator other = (Predator) preds.get(i);
@@ -452,7 +461,7 @@ class Predator {
 	// Chase
 	Vector2D chase (ArrayList preys) {
 	    float neighbordist = 100.0f;
-	    Vector2D sum = new Vector2D(0,0,0);   // Start with empty vector to accumulate all locations
+	    Vector2D sum = new Vector2D(0,0);   // Start with empty vector to accumulate all locations
 	    int count = 0;
 	    for (int i = 0 ; i < preys.size(); i++) {
 	      Prey other = (Prey) preys.get(i);
