@@ -287,6 +287,7 @@ class Predator {
   float r;
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
+  float truemax;
 
   Predator(Vector2D l, float ms, float mf) {
     acc = new Vector2D(0,0);
@@ -295,6 +296,7 @@ class Predator {
     r = 6.0f;
     maxspeed = ms;
     maxforce = mf;
+    truemax = 2 * ms;
   }
   
   void run(ArrayList preys, ArrayList preds) {
@@ -310,18 +312,21 @@ class Predator {
     Vector2D ali = align(preds);      // Alignment
     Vector2D coh = cohesion(preds);   // Cohesion
 	Vector2D chs = chase(preys);	  // Chase
+    Vector2D mou = mouseFollow();      // Mouse Follow
 	
     // Arbitrarily weight these forces
     sep.mult(3.0f);
     ali.mult(1.0f);
     coh.mult(0.5f);
     chs.mult(5.0f);
+    mou.mult(10.0f);
 	
     // Add the force vectors to acceleration
     acc.add(sep);
     acc.add(ali);
     acc.add(coh);
 	acc.add(chs);
+    if(mou.magnitude() != 0) acc.add(mou);
   }
   
   // Method to update location
@@ -456,6 +461,26 @@ class Predator {
       return steer(sum,false);  // Steer towards the location
     }
     return sum;
+  }
+  
+    // Cohesion
+  // Calculate the steering vector towards the mouse
+  Vector2D mouseFollow () {
+    if((mouseX == pmouseX) && (mouseY == pmouseY)) {
+      if(maxspeed > truemax/2) {
+        maxspeed -=.5f;
+        if(maxspeed < truemax/2) maxspeed = truemax/2;
+      }
+      return new Vector2D(0,0);
+    }
+    Vector2D mousePos = new Vector2D(mouseX, mouseY);
+    float distance = mousePos.distance(mousePos, loc);
+    if(distance > 100.0f){
+        maxspeed+=.5f;
+        if(maxspeed > truemax) maxspeed = truemax;
+    }
+    else if(distance < 50.0f) maxspeed-=.5f;
+    return steer(mousePos,false);  // Steer towards the location
   }
 
 	// Chase
