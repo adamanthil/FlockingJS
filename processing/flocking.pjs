@@ -343,8 +343,8 @@ class Protector {
     // Arbitrarily weight these forces
     sep.mult(3.0f);
     ali.mult(1.0f);
-    coh.mult(0.5f);
-    chs.mult(5.0f);
+    coh.mult(2.5f);
+    chs.mult(8.0f);
 	
     // Add the force vectors to acceleration
     acc.add(sep);
@@ -421,7 +421,7 @@ class Protector {
   // Separation
   // Method checks for nearby preys and steers away
   Vector2D separate (ArrayList preys) {
-    float desiredseparation = 30.0f;
+    float desiredseparation = 60.0f;
     Vector2D sum = new Vector2D(0,0);
     int count = 0;
     // For every prey in the system, check if it's too close
