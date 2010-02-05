@@ -319,14 +319,20 @@ class Predator {
     ali.mult(1.0f);
     coh.mult(0.5f);
     chs.mult(5.0f);
-    mou.mult(10.0f);
 	
     // Add the force vectors to acceleration
-    acc.add(sep);
-    acc.add(ali);
-    acc.add(coh);
-	acc.add(chs);
-    if(mou.magnitude() != 0) acc.add(mou);
+
+    if(mou.magnitude() != 0){
+      mou.mult(7.0f);
+      acc.add(mou);
+    }
+    else {
+      acc.add(sep);
+      acc.add(ali);
+      acc.add(coh);
+      acc.add(chs);
+    }
+      
   }
   
   // Method to update location
@@ -466,20 +472,29 @@ class Predator {
     // Cohesion
   // Calculate the steering vector towards the mouse
   Vector2D mouseFollow () {
-    if((mouseX == pmouseX) && (mouseY == pmouseY)) {
+    if(((mouseX == pmouseX) && (mouseY == pmouseY))){// && ((mouseX < 10) || (mouseX > width-10) || (mouseY<10) || mouseY > height-10)) {
       if(maxspeed > truemax/2) {
-        maxspeed -=.5f;
+        maxspeed -=.1f;
         if(maxspeed < truemax/2) maxspeed = truemax/2;
+      } else if(maxspeed < truemax/2) {
+        maxspeed += .1f;
+        if(maxspeed > truemax/2) maxspeed = truemax/2;
       }
       return new Vector2D(0,0);
     }
     Vector2D mousePos = new Vector2D(mouseX, mouseY);
     float distance = mousePos.distance(mousePos, loc);
     if(distance > 100.0f){
-        maxspeed+=.5f;
+        maxspeed+=.1f;
         if(maxspeed > truemax) maxspeed = truemax;
     }
-    else if(distance < 50.0f) maxspeed-=.5f;
+    else if(distance < 50.0f){
+      maxspeed-=.1f;
+      if(maxspeed < truemax/8) {
+        maxspeed = truemax/8;
+      }
+    }
+    
     return steer(mousePos,false);  // Steer towards the location
   }
 
