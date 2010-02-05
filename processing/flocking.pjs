@@ -699,10 +699,10 @@ class Predator {
     return sum;
   }
   
-    // Cohesion
+    // Mouse Follow
   // Calculate the steering vector towards the mouse
   Vector2D mouseFollow () {
-    if(((mouseX == pmouseX) && (mouseY == pmouseY))){// && ((mouseX < 10) || (mouseX > width-10) || (mouseY<10) || mouseY > height-10)) {
+    if((mouseX < 30) || (mouseX > width-30) || (mouseY<30) || (mouseY > height-30)) {
       if(maxspeed > truemax/2) {
         maxspeed -=.1f;
         if(maxspeed < truemax/2) maxspeed = truemax/2;
