@@ -29,6 +29,7 @@ void mousePressed() {
 class Flock {
   ArrayList preys; // An arraylist for all the preys
   ArrayList preds; // An arraylist for all the preds
+  ArrayList protectors;
 
   Flock() {
     preys = new ArrayList(); // Initialize the arraylist
@@ -44,6 +45,10 @@ class Flock {
     for (int i = 0; i < preds.size(); i++) {
       Predator b = (Predator) preds.get(i);  
       b.run(preys,preds);  // Passing the entire list of preys to each prey individually
+    }
+    for(int i=0; i<protectors.size(); i++) {
+      Protector b = (Protector) protectors.get(i);
+      b.run(preys,preds);
     }
 
 	// Loop through the predators and check for collisions
