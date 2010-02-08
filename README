@@ -1,0 +1,7 @@
+Authors:	Andrew Bender
+			Thomas Nagl
+Date:		February 2010
+
+This is a simple game that uses the Processing JS framework to demonstrate a variety of interactive flocking rules.
+
+This is our initial version, but more updates are coming that will show a score, allow more fine grained control, and tweak the flocking rules.
