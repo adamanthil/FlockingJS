@@ -41,15 +41,15 @@ class Flock {
   void run() {
     for (int i = 0; i < preys.size(); i++) {
       Prey b = (Prey) preys.get(i);  
-      b.run(preys,preds);  // Passing the entire list of preys to each prey individually
+      b.run(preys,preds,protectors);  // Passing all lists of entities
     }
     for (int i = 0; i < preds.size(); i++) {
       Predator b = (Predator) preds.get(i);  
-      b.run(preys,preds);  // Passing the entire list of preys to each prey individually
+      b.run(preys,preds,protectors);  // Passing the entire list of entities
     }
     for(int i=0; i<protectors.size(); i++) {
       Protector b = (Protector) protectors.get(i);
-      b.run(preys,preds);
+      b.run(preys,preds,protectors);
     }
 
 	// Loop through the predators and check for collisions
@@ -126,16 +126,16 @@ class Prey {
     maxforce = mf;
   }
   
-  void run(ArrayList preys, ArrayList preds) {
-    flock(preys, preds);
+  void run(ArrayList preys, ArrayList preds, ArrayList protectors) {
+    flock(preys, preds, protectors);
     update();
     borders();
     render();
   }
 
-  // We accumulate a new acceleration each time based on three rules
-  void flock(ArrayList preys, ArrayList preds) {
-    Vector2D sep = separate(preys);   // Separation
+  // We accumulate a new acceleration each time based on a number of rules
+  void flock(ArrayList preys, ArrayList preds, ArrayList protectors) {
+    Vector2D sep = separate(preys,protectors);   // Separation
     Vector2D ali = align(preys);      // Alignment
     Vector2D coh = cohesion(preys);   // Cohesion
 	Vector2D fle = flee(preds);			// Flee
@@ -220,13 +220,27 @@ class Prey {
 
   // Separation
   // Method checks for nearby preys and steers away
-  Vector2D separate (ArrayList preys) {
+  Vector2D separate (ArrayList preys, ArrayList protectors) {
     float desiredseparation = 30.0f;
     Vector2D sum = new Vector2D(0,0);
     int count = 0;
     // For every prey in the system, check if it's too close
     for (int i = 0 ; i < preys.size(); i++) {
       Prey other = (Prey) preys.get(i);
+      float d = loc.distance(loc,other.loc);
+      // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+      if ((d > 0) && (d < desiredseparation)) {
+        // Calculate vector pointing away from neighbor
+        Vector2D diff = loc.sub(loc,other.loc);
+        diff.normalize();
+        diff.div(d);        // Weight by distance
+        sum.add(diff);
+        count++;            // Keep track of how many
+      }
+    }
+    // For every protector in the system, check if it's too close
+    for (int i = 0 ; i < protectors.size(); i++) {
+      Protector other = (Protector) protectors.get(i);
       float d = loc.distance(loc,other.loc);
       // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
       if ((d > 0) && (d < desiredseparation)) {
@@ -334,15 +348,15 @@ class Protector {
     truemax = 2 * ms;
   }
   
-  void run(ArrayList preys, ArrayList preds) {
-    flock(preys, preds);
+  void run(ArrayList preys, ArrayList preds, ArrayList protectors) {
+    flock(preys, preds, protectors);
     update();
     borders();
     render();
   }
 
-  // We accumulate a new acceleration each time based on three rules
-  void flock(ArrayList preys, ArrayList preds) {
+  // We accumulate a new acceleration each time based on a number of rules
+  void flock(ArrayList preys, ArrayList preds, ArrayList protectors) {
     Vector2D sep = separate(preys);   // Separation
     Vector2D ali = align(preys);      // Alignment
     Vector2D coh = cohesion(preys);   // Cohesion
@@ -541,38 +555,41 @@ class Predator {
     truemax = 2 * ms;
   }
   
-  void run(ArrayList preys, ArrayList preds) {
-    flock(preys, preds);
+  void run(ArrayList preys, ArrayList preds, ArrayList protectors) {
+    flock(preys, preds, protectors);
     update();
     borders();
     render();
   }
 
-  // We accumulate a new acceleration each time based on three rules
-  void flock(ArrayList preys, ArrayList preds) {
+  // We accumulate a new acceleration each time based on a number of rules
+  void flock(ArrayList preys, ArrayList preds, ArrayList protectors) {
     Vector2D sep = separate(preds);   // Separation
     Vector2D ali = align(preds);      // Alignment
     Vector2D coh = cohesion(preds);   // Cohesion
 	Vector2D chs = chase(preys);	  // Chase
     Vector2D mou = mouseFollow();      // Mouse Follow
+	Vector2D fle = flee(protectors);	// Flee protectors
 	
     // Arbitrarily weight these forces
     sep.mult(3.0f);
     ali.mult(1.0f);
     coh.mult(0.5f);
     chs.mult(5.0f);
+	fle.mult(3.0f);
 	
     // Add the force vectors to acceleration
 
     if(mou.magnitude() != 0){
-      mou.mult(7.0f);
-      acc.add(mou);
+		mou.mult(7.0f);
+		acc.add(mou);
     }
     else {
-      acc.add(sep);
-      acc.add(ali);
-      acc.add(coh);
-      acc.add(chs);
+		acc.add(sep);
+		acc.add(ali);
+		acc.add(coh);
+		acc.add(chs);
+		acc.add(fle);
     }
       
   }
@@ -582,36 +599,33 @@ class Predator {
     // Update velocity
     vel.add(acc);
     // Limit speed
-    vel.limit(maxspeed);
+    vel.limit(truemax);
     loc.add(vel);
     // Reset accelertion to 0 each cycle
     acc.setXY(0,0);
   }
 
-  void seek(Vector2D target) {
-    acc.add(steer(target,false));
-  }
- 
-  void arrive(Vector2D target) {
-    acc.add(steer(target,true));
-  }
-
   // A method that calculates a steering vector towards a target
   // Takes a second argument, if true, it slows down as it approaches the target
-  Vector2D steer(Vector2D target, boolean slowdown) {
+  Vector2D steer(Vector2D target, boolean elastic) {
     Vector2D steer;  // The steering vector
     Vector2D desired = target.sub(target,loc);  // A vector pointing from the location to the target
     float d = desired.magnitude(); // Distance from the target is the magnitude of the vector
     // If the distance is greater than 0, calc steering (otherwise return zero vector)
     if (d > 0) {
-      // Normalize desired
-      desired.normalize();
-      // Two options for desired vector magnitude (1 -- based on distance, 2 -- maxspeed)
-      if ((slowdown) && (d < 100.0f)) desired.mult(maxspeed*(d/100.0f)); // This damping is somewhat arbitrary
-      else desired.mult(maxspeed);
-      // Steering = Desired minus Velocity
-      steer = target.sub(desired,vel);
-      steer.limit(maxforce);  // Limit to maximum steering force
+		// Normalize desired
+		desired.normalize();
+                
+		if(elastic) {
+			desired.mult(maxspeed * (d / 50.0f));
+		}
+		else {
+			desired.mult(maxspeed); 
+		}
+		
+		// Steering = Desired minus Velocity
+		steer = target.sub(desired,vel);
+		steer.limit(maxforce);  // Limit to maximum steering force
     } else {
       steer = new Vector2D(0,0);
     }
@@ -714,30 +728,35 @@ class Predator {
     // Mouse Follow
   // Calculate the steering vector towards the mouse
   Vector2D mouseFollow () {
+	// If mouse is directly next to the edge of the screen, return 0
     if((mouseX < 30) || (mouseX > width-30) || (mouseY<30) || (mouseY > height-30)) {
-      if(maxspeed > truemax/2) {
-        maxspeed -=.1f;
-        if(maxspeed < truemax/2) maxspeed = truemax/2;
-      } else if(maxspeed < truemax/2) {
-        maxspeed += .1f;
-        if(maxspeed > truemax/2) maxspeed = truemax/2;
-      }
       return new Vector2D(0,0);
     }
     Vector2D mousePos = new Vector2D(mouseX, mouseY);
-    float distance = mousePos.distance(mousePos, loc);
-    if(distance > 100.0f){
-        maxspeed+=.1f;
-        if(maxspeed > truemax) maxspeed = truemax;
-    }
-    else if(distance < 50.0f){
-      maxspeed-=.1f;
-      if(maxspeed < truemax/8) {
-        maxspeed = truemax/8;
+    
+    return steer(mousePos,true);  // Steer towards the location
+  }
+
+  // Flee from protectors
+  Vector2D flee (ArrayList protectors) {
+    float neighbordist = 80.0f;
+    Vector2D sum = new Vector2D(0,0);   // Start with empty vector to accumulate all locations
+    int count = 0;
+    for (int i = 0 ; i < protectors.size(); i++) {
+      Protector other = (Protector) protectors.get(i);
+      float d = loc.distance(loc,other.loc);
+      if ((d > 0) && (d < neighbordist)) {
+        sum.add(other.loc); // Add location
+        count++;
       }
     }
-    
-    return steer(mousePos,false);  // Steer towards the location
+    if (count > 0) {
+      sum.div((float)count);
+      sum = steer(sum,false);  // Steer towards the location
+		sum.mult(-1.0f);
+		return sum;
+    }
+    return sum;
   }
 
 	// Chase
