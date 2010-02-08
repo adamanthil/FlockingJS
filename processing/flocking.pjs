@@ -1,5 +1,6 @@
-// All Examples Written by Casey Reas and Ben Fry
-// unless otherwise stated.
+// Andrew Bender & Thomas Nagl
+// CS67 - Spring 2010
+// Originally based on flocking demo by Casey Reas and Ben Fry
 Flock flock;
 
 void setup() {
