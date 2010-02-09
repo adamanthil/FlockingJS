@@ -92,7 +92,7 @@ class Flock {
 			fill(0,150,0);
 		}
 		rect(5, 5, p.currentStamina, 10);
-		text("" + p.currentStamina, 115, 15); 
+		text("" + round(p.currentStamina), 115, 15); 
 	}
 	
 	fill(150,150,0);
@@ -617,25 +617,6 @@ class Predator {
 
     if(mou.magnitude() != 0){
 		//Stamina adjustments
-	if(recharging == true) {
-		if(currentStamina >= 50) {
-			recharging = false;
-			currentStamina+=.2f;
-		} else {
-			maxspeed = truemax/8;
-			currentStamina+=.2f;
-		}
-	} else if(currentStamina <= 0) {
-                currentStamina = 0;
-		recharging = true;
-	} else if(currentStamina > 100) {
-                currentStamina = 100;
-        }
-         if(maxspeed > truemax/2) {
-		currentStamina= currentStamina - .2f;
-	} else if(maxspeed < truemax/2) {
-		currentStamina= currentStamina + .2f;
-	}
 		mou.mult(7.0f);
 		acc.add(mou);
     }
@@ -652,20 +633,51 @@ class Predator {
       
   }
   
-  // Method to update location
-  void update() {
-    // Update velocity
-    vel.add(acc);
-    // Limit speed
-    vel.limit(truemax);
-    loc.add(vel);
-    // Reset accelertion to 0 each cycle
-    acc.setXY(0,0);
-  }
+	// Method to update location
+	void update() {
+		// Update velocity
+		vel.add(acc);
+		
+		// Cap speed
+		if(recharging) {
+			vel.limit(truemax/8.0f);
+		}
+		else {
+			vel.limit(truemax);	
+		}
+		
+		// Update the stamina
+		staminaUpdate();
+		loc.add(vel);
+		// Reset accelertion to 0 each cycle
+		acc.setXY(0,0);
+	}
+
+	// Update the stamina values
+	void staminaUpdate() {
+		
+		// Set if stamina is recharging
+		if(recharging && currentStamina >= 50) {
+			recharging = false;
+		} else if(currentStamina <= 0) {
+			currentStamina = 0;
+			recharging = true;
+		} else if(currentStamina > 100) {
+			currentStamina = 100;
+	    }
+		
+		// Stamina drain/recharge based on velocity
+		if(vel.magnitude() >= truemax / 2.0f) {
+			currentStamina -= 0.2f;
+		}
+		else {
+			currentStamina += 0.2f;
+		}
+	}
 
   // A method that calculates a steering vector towards a target
   // Takes a second argument, if true, it slows down as it approaches the target
-  Vector2D steer(Vector2D target, boolean elastic) {
+  Vector2D steer(Vector2D target, boolean userControl) {
     Vector2D steer;  // The steering vector
     Vector2D desired = target.sub(target,loc);  // A vector pointing from the location to the target
     float d = desired.magnitude(); // Distance from the target is the magnitude of the vector
@@ -674,8 +686,8 @@ class Predator {
 		// Normalize desired
 		desired.normalize();
                 
-		if(elastic) {
-			desired.mult(maxspeed * (d / 50.0f));
+		if(userControl) {
+			desired.mult(maxspeed * (d / 100.0f));
 		}
 		else {
 			desired.mult(maxspeed); 
@@ -792,19 +804,8 @@ class Predator {
       return new Vector2D(0,0);
     }
     Vector2D mousePos = new Vector2D(mouseX, mouseY);
-        float distance = mousePos.distance(mousePos, loc);
-    if((distance > 100.0f) && (recharging == false)){
-        maxspeed+=.1f;
-        if(maxspeed > truemax) maxspeed = truemax;
-    }
-    else if(distance < 50.0f){
-      maxspeed-=.1f;
-      if(maxspeed < truemax/8) {
-        maxspeed = truemax/8;
-      }
-    }
     
-    return steer(mousePos,false);  // Steer towards the location
+    return steer(mousePos,true);  // Steer towards the location
   }
 
   // Flee from protectors
