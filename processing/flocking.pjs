@@ -31,11 +31,15 @@ class Flock {
   ArrayList preys; // An arraylist for all the preys
   ArrayList preds; // An arraylist for all the preds
   ArrayList protectors;
+	int score;
+	int deaths;
 
   Flock() {
     preys = new ArrayList(); // Initialize the arraylist
     preds = new ArrayList();
 	protectors = new ArrayList();
+	score = 0;
+	deaths = 0;
   }
 
   void run() {
@@ -60,6 +64,7 @@ class Flock {
       		Prey p = (Prey) preys.get(j);  
       		if(p.loc.distance(p.loc,b.loc) < 10) {
 				removePrey(p);
+				score++;
 			}
     	}
 		// Check for collisions with protectors
@@ -67,9 +72,32 @@ class Flock {
 			Protector p = (Protector) protectors.get(j);
 			if(p.loc.distance(p.loc,b.loc) < 10) {
 				removePredator(b);
+				deaths++;
 			}
 		}
     }
+
+	PFont font = loadFont("ArialMT-12.vlw"); 
+	textFont(font); 
+      	stroke(0);
+	line(5, 5, 105, 5);
+	line(5, 15, 105, 15);
+	line(5, 5, 5, 15);
+	line(105, 5, 105, 15);
+	if(preds.size() > 0) {
+		Predator p = (Predator) preds.get(0);
+		if( p.recharging == true) {
+			fill(150,0,0);
+		} else {
+			fill(0,150,0);
+		}
+		rect(5, 5, p.currentStamina, 10);
+		text(p.currentStamina, 115, 15); 
+	}
+	
+	fill(150,150,0);
+	text("Score = " + score, 5, 30);
+	text("Deaths = " + deaths, 5, 45);
   }
 
 	void addPrey(Prey b) {
@@ -544,6 +572,8 @@ class Predator {
   float maxforce;    // Maximum steering force
   float maxspeed;    // Maximum speed
   float truemax;
+	float currentStamina;
+	boolean recharging;
 
   Predator(Vector2D l, float ms, float mf) {
     acc = new Vector2D(0,0);
@@ -553,6 +583,8 @@ class Predator {
     maxspeed = ms;
     maxforce = mf;
     truemax = 2 * ms;
+	currentStamina = 50.0f;
+	recharging = false;
   }
   
   void run(ArrayList preys, ArrayList preds, ArrayList protectors) {
@@ -578,6 +610,29 @@ class Predator {
     chs.mult(5.0f);
 	fle.mult(3.0f);
 	
+	//Stamina adjustments
+	if(recharging == true) {
+		if(currentStamina >= 50) {
+			recharging = false;
+			currentStamina+=.2f;
+		} else {
+			maxspeed = truemax/8;
+			currentStamina+=.2f;
+		}
+	} else if(currentStamina <= 0) {
+                currentStamina = 0;
+		recharging = true;
+	} else if(currentStamina > 100) {
+                currentStamina = 100;
+        }
+         if(maxspeed > truemax/2) {
+		currentStamina= currentStamina - .2f;
+	} else if(maxspeed < truemax/2) {
+		currentStamina= currentStamina + .2f;
+	}
+
+
+
     // Add the force vectors to acceleration
 
     if(mou.magnitude() != 0){
@@ -591,6 +646,8 @@ class Predator {
 		acc.add(chs);
 		acc.add(fle);
     }
+
+
       
   }
   
@@ -725,16 +782,28 @@ class Predator {
     return sum;
   }
   
+
     // Mouse Follow
   // Calculate the steering vector towards the mouse
   Vector2D mouseFollow () {
 	// If mouse is directly next to the edge of the screen, return 0
-    if((mouseX < 30) || (mouseX > width-30) || (mouseY<30) || (mouseY > height-30)) {
+    if((mouseX < 15) || (mouseX > width-15) || (mouseY<15) || (mouseY > height-15)) {
       return new Vector2D(0,0);
     }
     Vector2D mousePos = new Vector2D(mouseX, mouseY);
+        float distance = mousePos.distance(mousePos, loc);
+    if((distance > 100.0f) && (recharging == false)){
+        maxspeed+=.1f;
+        if(maxspeed > truemax) maxspeed = truemax;
+    }
+    else if(distance < 50.0f){
+      maxspeed-=.1f;
+      if(maxspeed < truemax/8) {
+        maxspeed = truemax/8;
+      }
+    }
     
-    return steer(mousePos,true);  // Steer towards the location
+    return steer(mousePos,false);  // Steer towards the location
   }
 
   // Flee from protectors
