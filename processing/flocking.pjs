@@ -77,9 +77,9 @@ class Flock {
 		}
     }
 
-	PFont font = loadFont("ArialMT-12.vlw"); 
+	PFont font = loadFont("Verdana"); 
 	textFont(font); 
-      	stroke(0);
+    stroke(0);
 	line(5, 5, 105, 5);
 	line(5, 15, 105, 15);
 	line(5, 5, 5, 15);
@@ -92,7 +92,7 @@ class Flock {
 			fill(0,150,0);
 		}
 		rect(5, 5, p.currentStamina, 10);
-		text(p.currentStamina, 115, 15); 
+		text("" + p.currentStamina, 115, 15); 
 	}
 	
 	fill(150,150,0);
