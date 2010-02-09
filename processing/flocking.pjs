@@ -610,7 +610,13 @@ class Predator {
     chs.mult(5.0f);
 	fle.mult(3.0f);
 	
-	//Stamina adjustments
+
+
+
+    // Add the force vectors to acceleration
+
+    if(mou.magnitude() != 0){
+		//Stamina adjustments
 	if(recharging == true) {
 		if(currentStamina >= 50) {
 			recharging = false;
@@ -630,16 +636,11 @@ class Predator {
 	} else if(maxspeed < truemax/2) {
 		currentStamina= currentStamina + .2f;
 	}
-
-
-
-    // Add the force vectors to acceleration
-
-    if(mou.magnitude() != 0){
 		mou.mult(7.0f);
 		acc.add(mou);
     }
     else {
+		maxspeed = truemax/2;
 		acc.add(sep);
 		acc.add(ali);
 		acc.add(coh);
