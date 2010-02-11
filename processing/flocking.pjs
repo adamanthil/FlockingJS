@@ -24,7 +24,7 @@ void draw() {
 
 // Add a new prey into the System
 void mousePressed() {
-  flock.addPredator(new Predator(new Vector2D(mouseX,mouseY),3.0f,0.06f));
+  flock.addPredator(new Predator(new Vector2D(mouseX,mouseY),3.6f,0.06f));
   //flock.removePrey((Prey)flock.preys.get(0));
 }
 
