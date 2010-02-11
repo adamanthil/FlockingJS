@@ -6,6 +6,7 @@ Flock flock;
 void setup() {
   size(600,500);
   colorMode(RGB,255,255,255,100);
+frameRate(45);
   flock = new Flock();
   // Add an initial set of preys into the system
   for (int i = 0; i < 20; i++) {
@@ -31,18 +32,32 @@ class Flock {
   ArrayList preys; // An arraylist for all the preys
   ArrayList preds; // An arraylist for all the preds
   ArrayList protectors;
+	PFont font;
+	int round;
 	int score;
-	int deaths;
+	int lives;
+	int consecKills;
+	int spreeTime;
+	boolean displayPrize;
 
   Flock() {
     preys = new ArrayList(); // Initialize the arraylist
     preds = new ArrayList();
+	font = loadFont("Verdana"); 
+	textFont(font); 
 	protectors = new ArrayList();
+	round = 1;
 	score = 0;
-	deaths = 0;
+	lives = 5;
+	consecKills = 0;
+	displayPrize = false;
   }
 
   void run() {
+	if(preys.size() == 0) {
+		nextRound();
+	}
+
     for (int i = 0; i < preys.size(); i++) {
       Prey b = (Prey) preys.get(i);  
       b.run(preys,preds,protectors);  // Passing all lists of entities
@@ -65,6 +80,10 @@ class Flock {
       		if(p.loc.distance(p.loc,b.loc) < 10) {
 				removePrey(p);
 				score++;
+				consecKills++;
+				if(consecKills%5 == 0) {
+					killingSpree();
+				}
 			}
     	}
 		// Check for collisions with protectors
@@ -72,14 +91,14 @@ class Flock {
 			Protector p = (Protector) protectors.get(j);
 			if(p.loc.distance(p.loc,b.loc) < 10) {
 				removePredator(b);
-				deaths++;
+				displayPrize = false;
+				lives--;
+				consecKills = 0;
 			}
 		}
     }
 
-	PFont font = loadFont("Verdana"); 
-	textFont(font); 
-    stroke(0);
+	stroke(0);
 	line(5, 5, 105, 5);
 	line(5, 15, 105, 15);
 	line(5, 5, 5, 15);
@@ -96,8 +115,24 @@ class Flock {
 	}
 	
 	fill(150,150,0);
-	text("Score = " + score, 5, 30);
-	text("Deaths = " + deaths, 5, 45);
+	text("ROUND " + round, 5, 30);
+	text("Score = " + score, 5, 45);
+	text("Lives = " + lives, 5, 60);
+
+	//If it is within 5 seconds of a killing spree occuring, inform the player that it occured
+	if( (displayPrize) && (spreeTime + 5) > ((hour()*360) + (minute()*60) + second())) {
+		fill(0,200,0);
+		text("KILLING SPREE + " + consecKills/5 + " LIVES", 5, 75);
+	}
+
+
+	if(lives == 0) {
+		gameOver();
+	}
+	if(preys.size() == 0) {
+		fill(0,200,0);
+		text("ROUND " + round + " COMPLETED", 5, 90);
+	}
   }
 
 	void addPrey(Prey b) {
@@ -129,6 +164,54 @@ class Flock {
 		if(index > -1) {
 			protectors.remove(index);
 		}
+	}
+
+	void killingSpree() {
+		// Calculate time of killing spree
+		spreeTime = (hour()*360) + (minute()*60) + second();
+		displayPrize = true;
+		//Give reward
+		lives+= consecKills/5;	
+	}
+	
+	void gameOver() {
+		// END THE GAME
+		fill(200,0,0);
+		text("GAME OVER", 300, 235);
+		exit();
+	}
+
+	void nextRound() {
+		//END ROUND AND SET UP NEXT ONE
+
+		int time = (hour()*360) + (minute()*60) + second() + 5;
+		while(((hour()*360) + (minute()*60) + second()) < time) {
+			//PAUSE
+		}
+
+		round++;
+		consecKills = 0;
+
+		//remove existing predators
+		while(preds.size() > 0) {
+			removePredator( (Predator)preds.get(0) );
+		}
+
+		//remove existing protectors
+		while(protectors.size() > 0) {
+			removeProtector( (Protector)protectors.get(0) );
+		}
+		
+		//add new prey
+		for (int i = 0; i < 20; i++) {
+			flock.addPrey(new Prey(new Vector2D(width/2,height/2),2.5f,0.08f));
+		}
+
+		//add new protectors
+		for(int i=0; i<round; i++) {
+			flock.addProtector(new Protector(new Vector2D(width/2,height/2),2.8,0.07f));
+		}
+		
 	}
 }
 
