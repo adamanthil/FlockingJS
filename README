@@ -4,4 +4,4 @@ Date:		February 2010
 
 This is a simple game that uses the Processing JS framework to demonstrate a variety of interactive flocking rules.
 
-This is our initial version, but more updates are coming that will show a score, allow more fine grained control, and tweak the flocking rules.
+NB: USE FIREFOX!  There seems to be a problem with the webkit (ie Chrome & Safari) javascript engine rendering fonts in the canvas.  The game relies on some fonts.  Firefox displays them correctly, but Chrome and Safari do not.
