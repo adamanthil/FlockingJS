@@ -33,7 +33,7 @@ class Flock {
   ArrayList preds; // An arraylist for all the preds
   ArrayList protectors;
 	PFont font;
-	int round;
+	int roundNum;
 	int score;
 	int lives;
 	int consecKills;
@@ -46,7 +46,7 @@ class Flock {
 	font = loadFont("Verdana"); 
 	textFont(font); 
 	protectors = new ArrayList();
-	round = 1;
+	roundNum = 1;
 	score = 0;
 	lives = 5;
 	consecKills = 0;
@@ -115,7 +115,7 @@ class Flock {
 	}
 	
 	fill(150,150,0);
-	text("ROUND " + round, 5, 30);
+	text("ROUND " + roundNum, 5, 30);
 	text("Score = " + score, 5, 45);
 	text("Lives = " + lives, 5, 60);
 
@@ -131,7 +131,7 @@ class Flock {
 	}
 	if(preys.size() == 0) {
 		fill(0,200,0);
-		text("ROUND " + round + " COMPLETED", 5, 90);
+		text("ROUND " + roundNum + " COMPLETED", 5, 90);
 	}
   }
 
