@@ -2,8 +2,8 @@
 // CS679 - Spring 2010
 // Originally based on flocking demo by Casey Reas and Ben Fry
 Flock flock;
-int leftBorder = 135;
-int rightBorder = 870;
+int leftBorder = 120;
+int rightBorder = 880;
 int topBorder = 100;
 int bottomBorder = 530;
 
@@ -155,7 +155,7 @@ class Flock {
 	}
 	if(preys.size() == 0) {
 		fill(0,200,0);
-		text("ROUND " + roundNum + " COMPLETED", leftBorder, topBorder);
+		text("ROUND " + roundNum + " COMPLETED", leftBorder, topBorder-2);
 	}
   }
 
@@ -207,7 +207,7 @@ class Flock {
 	void gameOver() {
 		// END THE GAME
 		fill(200,0,0);
-		text("GAME OVER", leftBorder, topBorder);
+		text("GAME OVER", leftBorder, topBorder-2);
 		exit();
 	}
 
