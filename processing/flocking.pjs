@@ -451,7 +451,7 @@ class Prey {
 		separationComp.mult(4.0f);
 		alignComp.mult(1.0f);
 		cohesionComp.mult(1.8f);
-		fleeComp.mult(7.0f);
+		fleeComp.mult(6.0f);
 
 		// Add the force vectors to acceleration
 		acc.add(separationComp);
