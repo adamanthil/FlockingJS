@@ -29,6 +29,7 @@ Predators
 ---If the stamina bar reaches 0, the Predator is locked into a very slow speed until stamina reaches 50.
 -When the mouse is being used, the Predator follows these rules:
 ---Moves toward the mouse's location
+---Separation from other Predators to stop collisions.
 ---The farther away the mouse (past 100 pixels) the faster the Predator accelerates.
 ---The closer the mouse (within 100 pixels) the faster the Predator deccelerates.
 ---If the Predator is moving too fast, the stamina bar decreases.
@@ -36,7 +37,7 @@ Predators
 ---If the stamina bar reaches 0, the Predator is locked into a very slow speed until stamina reaches 50.
 
 Game Aspect:
--You are the Predator(red boid) and your job is to eat the Prey(white boids) and avoid being eaten by the Protectors(blue boids).
+-You are the Predators(red boid) and your job is to eat the Prey(white boids) and avoid being eaten by the Protectors(blue boids).
 -If you reach a killing spree(5, 10, 15, or 20 kills in a row) you recieve bonus lives.
 -With each round, more Protectors are added to the game.
 
@@ -46,7 +47,10 @@ Performance Analysis:
 -We also switched the 3D vectors that the program already had into 2D vectors.
 
 Cool Features:
--
+-Stamina bar
+-Mouse follow
+-Infinitely long game
 
 Experimentation:
--
+-We changed the chase and flee flocking rules to try and obtain a desired effect.
+-We modified the influence of the mouse and separation rules to gain better Predator behavior.
