@@ -2,24 +2,37 @@
 // CS67 - Spring 2010
 // Originally based on flocking demo by Casey Reas and Ben Fry
 Flock flock;
+int leftBorder = 120;
+int rightBorder = 880;
+int topBorder = 100;
+int bottomBorder = 530;
 
 void setup() {
-  size(600,500);
-  colorMode(RGB,255,255,255,100);
-frameRate(45);
-  flock = new Flock();
-  // Add an initial set of preys into the system
-  for (int i = 0; i < 20; i++) {
-    flock.addPrey(new Prey(new Vector2D(width/2,height/2),2.5f,0.08f));
-  }
-  flock.addProtector(new Protector(new Vector2D(width/2,height/2),2.8,0.07f));
-  smooth();
+	size(1000,610);
+	colorMode(RGB,255,255,255,100);
+	frameRate(45);
+
+	flock = new Flock();
+	// Add an initial set of preys into the system
+	for (int i = 0; i < 20; i++) {
+	  flock.addPrey(new Prey(new Vector2D(width/2,height/2),2.5f,0.08f));
+	}
+	flock.addProtector(new Protector(new Vector2D(width/2,height/2),2.8,0.07f));
+	smooth();
 }
 
 void draw() {
 
-  background(100);
-  flock.run();
+	background(100);
+	// Draw Borders
+	stroke(0);
+	
+	line(leftBorder,topBorder,rightBorder,topBorder);
+	line(rightBorder,topBorder,rightBorder,bottomBorder);
+	line(rightBorder,bottomBorder,leftBorder,bottomBorder);
+	line(leftBorder,bottomBorder,leftBorder,topBorder);
+	
+	flock.run();
 }
 
 // Add a new prey into the System
@@ -29,9 +42,9 @@ void mousePressed() {
 }
 
 class Flock {
-  ArrayList preys; // An arraylist for all the preys
-  ArrayList preds; // An arraylist for all the preds
-  ArrayList protectors;
+	ArrayList preys; // An arraylist for all the preys
+	ArrayList preds; // An arraylist for all the preds
+	ArrayList protectors;
 	PFont font;
 	int roundNum;
 	int score;
@@ -122,7 +135,7 @@ class Flock {
 	//If it is within 5 seconds of a killing spree occuring, inform the player that it occured
 	if( (displayPrize) && (spreeTime + 5) > ((hour()*360) + (minute()*60) + second())) {
 		fill(0,200,0);
-		text("KILLING SPREE + " + consecKills/5 + " LIVES", 5, 75);
+		text("KILLING SPREE + " + floor(consecKills/5) + " LIVES", 5, 75);
 	}
 
 
@@ -304,10 +317,10 @@ class Prey {
   
 	// Wraparound
 	void borders() {
-		if (loc.x < -r) loc.x = width+r;
-		if (loc.y < -r) loc.y = height+r;
-		if (loc.x > width+r) loc.x = -r;
-		if (loc.y > height+r) loc.y = -r;
+		if (loc.x < leftBorder-r) loc.x = rightBorder+r;
+		if (loc.y < topBorder-r) loc.y = bottomBorder+r;
+		if (loc.x > rightBorder+r) loc.x = leftBorder-r;
+		if (loc.y > bottomBorder+r) loc.y = topBorder-r;
 	}
 	
 	// We accumulate a new acceleration each time based on a number of rules
@@ -535,10 +548,10 @@ class Protector {
   
   // Wraparound
   void borders() {
-    if (loc.x < -r) loc.x = width+r;
-    if (loc.y < -r) loc.y = height+r;
-    if (loc.x > width+r) loc.x = -r;
-    if (loc.y > height+r) loc.y = -r;
+	if (loc.x < leftBorder-r) loc.x = rightBorder+r;
+	if (loc.y < topBorder-r) loc.y = bottomBorder+r;
+	if (loc.x > rightBorder+r) loc.x = leftBorder-r;
+	if (loc.y > bottomBorder+r) loc.y = topBorder-r;
   }
 
   // Separation
@@ -802,10 +815,10 @@ class Predator {
   
   // Wraparound
   void borders() {
-    if (loc.x < -r) loc.x = width+r;
-    if (loc.y < -r) loc.y = height+r;
-    if (loc.x > width+r) loc.x = -r;
-    if (loc.y > height+r) loc.y = -r;
+	if (loc.x < leftBorder-r) loc.x = rightBorder+r;
+	if (loc.y < topBorder-r) loc.y = bottomBorder+r;
+	if (loc.x > rightBorder+r) loc.x = leftBorder-r;
+	if (loc.y > bottomBorder+r) loc.y = topBorder-r;
   }
 
   // Separation
