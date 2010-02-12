@@ -51,7 +51,9 @@ class Flock {
 	int lives;
 	int consecKills;
 	int spreeTime;
+	int placeTime;
 	boolean displayPrize;
+	boolean displayError;
 
   Flock() {
     preys = new ArrayList(); // Initialize the arraylist
@@ -64,6 +66,7 @@ class Flock {
 	lives = 5;
 	consecKills = 0;
 	displayPrize = false;
+	displayError = false;
   }
 
   void run() {
@@ -112,30 +115,38 @@ class Flock {
     }
 
 	stroke(0);
-	line(5, 5, 105, 5);
-	line(5, 15, 105, 15);
-	line(5, 5, 5, 15);
-	line(105, 5, 105, 15);
-	if(preds.size() > 0) {
-		Predator p = (Predator) preds.get(0);
+	
+	int offset = 80;
+	for(int i=0; i< preds.size(); i++) {
+		Predator p = (Predator) preds.get(i);
+		noFill();
+		stroke(0);
+		rect(5, offset, 100, 10);
 		if( p.recharging == true) {
 			fill(150,0,0);
 		} else {
 			fill(0,150,0);
 		}
-		rect(5, 5, p.currentStamina, 10);
-		text("" + round(p.currentStamina), 115, 15); 
+		rect(5, offset, p.currentStamina, 10);
+		text("" + round(p.currentStamina), 115, offset+10); 
+		offset += 15;
 	}
 	
 	fill(150,150,0);
-	text("ROUND " + roundNum, 5, 30);
-	text("Score = " + score, 5, 45);
-	text("Lives = " + lives, 5, 60);
+	text("ROUND " + roundNum, 5, 15);
+	text("Score = " + score, 5, 30);
+	text("Lives = " + lives, 5, 45);
 
 	//If it is within 5 seconds of a killing spree occuring, inform the player that it occured
 	if( (displayPrize) && (spreeTime + 5) > ((hour()*360) + (minute()*60) + second())) {
 		fill(0,200,0);
-		text("KILLING SPREE + " + floor(consecKills/5) + " LIVES", 5, 75);
+		text("KILLING SPREE + " + floor(consecKills/5) + " LIVES", 5, 60);
+	}
+
+	//If it is within 5 seconds of an incorrect placement, inform the player that it occured
+	if( (displayError) && (placeTime + 5) > ((hour()*360) + (minute()*60) + second())) {
+		fill(200,0,0);
+		text("NO MORE PREDATORS LEFT TO PLACE", 5, 75);
 	}
 
 
@@ -153,7 +164,13 @@ class Flock {
 	}
 
 	void addPredator(Predator p) {
-		preds.add(p);
+		if(preds.size() < lives) {
+			preds.add(p);
+		} else {
+			// Calculate time of attempted placement
+			placeTime = (hour()*360) + (minute()*60) + second();
+			displayError = true;
+		}
 	}
 
 	void addProtector(Protector p) {
@@ -190,7 +207,7 @@ class Flock {
 	void gameOver() {
 		// END THE GAME
 		fill(200,0,0);
-		text("GAME OVER", 300, 235);
+		text("GAME OVER", 5, 75);
 		exit();
 	}
 
