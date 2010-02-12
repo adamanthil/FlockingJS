@@ -39,17 +39,11 @@
 <script language="JavaScript" type="text/javascript">
 var PJS = {
     "name" : "flocking",
-    
     "desc" : "<b>Flocking Fun!</b> by Andrew & Tom;",
-        
     "instructions": "Click to make a predator and direct it to eat the prey, but watch out for blue guardians!"
 };
 
 $(document).ready(function() {
-
-    // Fill in the blanks
-    $("#desc").html(PJS.desc);
-    $("#instructions").html(PJS.instructions);
     
     // Pass the script to a var using jQuery.ajax();
     var script = $.ajax({url: "processing/" + PJS.name + ".pjs", async: false}).responseText;

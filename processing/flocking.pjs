@@ -71,6 +71,10 @@ class Flock {
 		nextRound();
 	}
 
+    for(int i=0; i<protectors.size(); i++) {
+      Protector b = (Protector) protectors.get(i);
+      b.run(preys,preds,protectors);
+    }
     for (int i = 0; i < preys.size(); i++) {
       Prey b = (Prey) preys.get(i);  
       b.run(preys,preds,protectors);  // Passing all lists of entities
@@ -78,10 +82,6 @@ class Flock {
     for (int i = 0; i < preds.size(); i++) {
       Predator b = (Predator) preds.get(i);  
       b.run(preys,preds,protectors);  // Passing the entire list of entities
-    }
-    for(int i=0; i<protectors.size(); i++) {
-      Protector b = (Protector) protectors.get(i);
-      b.run(preys,preds,protectors);
     }
 
 	// Loop through the predators and check for collisions
@@ -387,6 +387,7 @@ class Prey {
 		        alignComp.add(other.vel);
 				cohesionComp.add(other.loc);
 		        alignCount++;
+			}
 		}
 		
 		// -------------------------------------------------------------------
@@ -704,26 +705,30 @@ class Predator {
   // We accumulate a new acceleration each time based on a number of rules
   void flock(ArrayList preys, ArrayList preds, ArrayList protectors) {
     Vector2D sep = separate(preds);   // Separation
-    Vector2D ali = align(preds);      // Alignment
-    Vector2D coh = cohesion(preds);   // Cohesion
-	Vector2D chs = chase(preys);	  // Chase
-    Vector2D mou = mouseFollow();      // Mouse Follow
-	Vector2D fle = flee(protectors);	// Flee protectors
-	
-    // Arbitrarily weight these forces
-    sep.mult(3.0f);
-    ali.mult(1.0f);
-    coh.mult(0.5f);
-    chs.mult(5.0f);
-	fle.mult(3.0f);
+	Vector2D mou = mouseFollow();      // Mouse Follow
 
     // Add the force vectors to acceleration
     if(mou.magnitude() != 0){
 		//Stamina adjustments
-		mou.mult(7.0f);
+		mou.mult(5.0f);
+		sep.mult(5.0f);
+		acc.add(sep);
 		acc.add(mou);
     }
     else {
+	
+	    Vector2D ali = align(preds);      // Alignment
+	    Vector2D coh = cohesion(preds);   // Cohesion
+		Vector2D chs = chase(preys);	  // Chase
+		Vector2D fle = flee(protectors);	// Flee protectors
+
+	    // Arbitrarily weight these forces
+	    sep.mult(3.0f);
+	    ali.mult(1.0f);
+	    coh.mult(1.5f);
+	    chs.mult(5.0f);
+		fle.mult(3.0f);
+	
 		maxspeed = truemax/2;
 		acc.add(sep);
 		acc.add(ali);
@@ -900,8 +905,8 @@ class Predator {
     // Mouse Follow
   // Calculate the steering vector towards the mouse
   Vector2D mouseFollow () {
-	// If mouse is directly next to the edge of the screen, return 0
-    if((mouseX < 15) || (mouseX > width-15) || (mouseY<15) || (mouseY > height-15)) {
+	// If mouse is in the top left corner, use AI
+    if((mouseX < 100) && (mouseY<80)) {
       return new Vector2D(0,0);
     }
     Vector2D mousePos = new Vector2D(mouseX, mouseY);
