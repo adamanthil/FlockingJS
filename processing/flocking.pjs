@@ -2,7 +2,7 @@
 // CS679 - Spring 2010
 // Originally based on flocking demo by Casey Reas and Ben Fry
 Flock flock;
-int leftBorder = 130;
+int leftBorder = 135;
 int rightBorder = 870;
 int topBorder = 100;
 int bottomBorder = 530;
