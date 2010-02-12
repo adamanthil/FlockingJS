@@ -1,5 +1,5 @@
 // Andrew Bender & Thomas Nagl
-// CS67 - Spring 2010
+// CS679 - Spring 2010
 // Originally based on flocking demo by Casey Reas and Ben Fry
 Flock flock;
 int leftBorder = 120;
@@ -381,6 +381,12 @@ class Prey {
 				separationComp.add(diff);
 				separationCount++;            // Keep track of how many
 			}
+
+			// Alignment & Cohesion
+			if ((d > 0) && (d < neighbordist)) {
+		        alignComp.add(other.vel);
+				cohesionComp.add(other.loc);
+		        alignCount++;
 		}
 		
 		// -------------------------------------------------------------------
